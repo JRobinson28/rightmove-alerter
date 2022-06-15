@@ -4,5 +4,5 @@
                  [com.taoensso/timbre "5.2.1"]
                  [enlive "1.1.6"]
                  [org.clojure/clojure "1.10.3"]]
-  :repl-options {:init-ns rightmove.core}
+  :repl-options {:init-ns core.rightmove-alerter.core}
   :profiles {:uberjar {:aot :all}})
