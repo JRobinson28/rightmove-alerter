@@ -30,3 +30,4 @@
 .lein-repl-history
 samconfig.toml
 .aws-sam/*
+.markdown-preview.html
