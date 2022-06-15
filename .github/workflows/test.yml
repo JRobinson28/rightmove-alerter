@@ -1,0 +1,22 @@
+name: 'Test'
+
+on: [push]
+
+jobs:
+  test:
+    name: 'Test'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Lein
+        uses: oxr463/setup-leiningen@0.0.1
+
+      - name: Tests
+        run: lein test
