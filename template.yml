@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  rightmove-alerter
+
+Globals:
+  Function:
+    Timeout: 60
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      FunctionName: rightmove-alerter
+      MemorySize: 256
+      Architectures:
+        - x86_64
+      Events:
+        MyScheduledEvent:
+          Type: Schedule
+          Properties:
+            Schedule: rate(4 minutes)
+            Name: MyScheduledEvent
+            Description: Event that triggers the lambda every 4 minutes
+            Enabled: true
+      Policies:
+        - "AmazonDynamoDBFullAccess"
+        - "AmazonSNSFullAccess"
+    Metadata:
+      DockerTag: rightmove-alerter-v1
+      DockerContext: ./
+      Dockerfile: Dockerfile
+
+  DynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "latest-homes"
+      AttributeDefinitions:
+        -
+          AttributeName: "URL"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "URL"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "new-homes"
+
+  MySubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: joseph28robinson@gmail.com
+      Protocol: email
+      TopicArn: !Ref 'SNSTopic'
+
+
+Outputs:
+  LambdaFunctionArn:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt LambdaFunction.Arn
+  FunctionIamRoleArn:
+    Description: "Implicit IAM Role created for function"
+    Value: !GetAtt LambdaFunctionRole.Arn
