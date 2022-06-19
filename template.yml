@@ -24,6 +24,7 @@ Resources:
             Name: MyScheduledEvent
             Description: Event that triggers the lambda every 4 minutes
             Enabled: true
+            Input: "{\"location\":\"REGION%5E20676\",\"max-price\":1400,\"min-bedrooms\":1,\"max-bedrooms\":2,\"radius\":1.0}"
       Policies:
         - "AmazonDynamoDBFullAccess"
         - "AmazonSNSFullAccess"

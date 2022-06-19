@@ -1,5 +1,7 @@
 (ns core.rightmove-alerter.core
   (:require
+   [cheshire.core :as json]
+   [clojure.java.io :as io]
    [core.rightmove-alerter.aws :as aws]
    [core.rightmove-alerter.scraper :as scraper]
    [taoensso.timbre :as log])
@@ -7,15 +9,14 @@
    :implements [com.amazonaws.services.lambda.runtime.RequestStreamHandler]))
 
 
-(def my-event {:location "REGION%5E20676"
-               :max-price 1400
-               :min-bedrooms 1
-               :max-bedrooms 2
-               :radius 1.0})
+(defn- input-stream->json
+  [input-stream]
+  (json/parse-stream (io/reader input-stream) true))
 
 (defn -handleRequest
-  [_ _ _ _]
-  (let [urls (scraper/scrape-page my-event)]
+  [_ input-stream _ _]
+  (let [event-map (input-stream->json input-stream)
+        urls (scraper/scrape-page event-map)]
     (log/info "Scraped" (count urls) "URLs")
     (aws/alert-new-uploads urls)))
 
