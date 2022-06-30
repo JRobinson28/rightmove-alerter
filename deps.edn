@@ -1,0 +1,22 @@
+{:paths ["src" "resources"]
+ :deps {amazonica/amazonica {:mvn/version "0.3.161"
+                             :exclusions [com.amazonaws/aws-java-sdk
+                                          com.amazonaws/amazon-kinesis-client
+                                          com.amazonaws/dynamodb-streams-kinesis-adapter]}
+        cheshire/cheshire {:mvn/version "5.11.0"}
+        com.amazonaws/aws-java-sdk-dynamodb {:mvn/version "1.12.249"}
+        com.amazonaws/aws-java-sdk-sns {:mvn/version "1.12.249"}
+        com.amazonaws/aws-lambda-java-core {:mvn/version "1.2.1"}
+        com.amazonaws/aws-lambda-java-runtime-interface-client {:mvn/version "2.0.0"}
+        com.taoensso/timbre {:mvn/version "5.2.1"}
+        enlive/enlive {:mvn/version "1.1.6"}
+        org.clojure/clojure {:mvn/version "1.11.1"}}
+ :aliases {:run-m {:main-opts ["-m" "core.rightmove-alerter.core"]}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
+                   :ns-default build}
+           :test {:extra-paths ["test"]
+                  :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
+                               io.github.cognitect-labs/test-runner
+                               {:git/tag "v0.5.0" :git/sha "48c3c67"}}
+                  :main-opts ["-m" "cognitect.test-runner"]
+                  :exec-fn cognitect.test-runner.api/test}}}
