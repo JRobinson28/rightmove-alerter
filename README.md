@@ -1,12 +1,8 @@
-<h1 align="center">
-  <br>
-   Rightmove Alerter
-</h1>
+# Rightmove Alerter
 
-<p align="center">
-  Creating custom rightmove rental alerts using AWS Lambda.
-</p>
+![Tests](https://github.com/JRobinson28/rightmove-alerter/actions/workflows/test.yml/badge.svg) ![Build](https://github.com/JRobinson28/rightmove-alerter/actions/workflows/deploy.yml/badge.svg)
 
+Creating custom rightmove rental alerts using AWS Lambda.
 
 ## How it works
 
@@ -19,4 +15,3 @@ The application and AWS infrastructure is deployed using the [AWS Serverless App
 <p align="center">
   <img src="./resources/architecture-diagram.png">
 </p>
-
