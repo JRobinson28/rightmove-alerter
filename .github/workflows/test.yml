@@ -15,8 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Lein
-        uses: oxr463/setup-leiningen@0.0.1
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@4.0
+        with:
+          cli: 1.10.3.905
 
       - name: Tests
-        run: lein test
+        run: clojure -X:test
