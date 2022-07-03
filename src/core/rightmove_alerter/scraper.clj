@@ -8,7 +8,7 @@
        "&maxBedrooms=" max-bedrooms
        "&minBedrooms=" min-bedrooms
        "&maxPrice=" max-price
-       "&radius=" radius
+       "&radius=" (or radius 0.0)
        "&propertyTypes=&includeLetAgreed=false&mustHave=&dontShow=&furnishTypes=&keywords="))
 
 (defn- extract-link
