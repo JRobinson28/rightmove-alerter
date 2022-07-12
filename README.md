@@ -31,3 +31,4 @@ Then follow these steps:
 - Modify `MySubscription > Properties > Endpoint` in `template.yml` to configure the subscription to your chosen email address.
 - From the command line run `sam build` followed by `sam deploy` and accept all the default options.
 - If everything worked the function should now be up and running in your AWS account. Everything in this project is within free tier limits so there shouldn't be any charges incurred.
+- When you want to stop the function from running, just run `sam delete`. This will delete the cloudformation stack and all the resources from your AWS account.
