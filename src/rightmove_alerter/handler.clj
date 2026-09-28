@@ -15,6 +15,6 @@
 (defn -handleRequest
   [_ input-stream _ _]
   (let [event-map (input-stream->json input-stream)
-        urls (scraper/scrape-page event-map)]
+        urls (mapv :url (scraper/scrape event-map))]
     (log/info "Scraped" (count urls) "URLs")
     (alerter/alert-new-uploads urls)))
