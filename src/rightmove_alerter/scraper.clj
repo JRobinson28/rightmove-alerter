@@ -1,4 +1,4 @@
-(ns core.rightmove-alerter.scraper
+(ns rightmove-alerter.scraper
   (:require [clojure.java.io :as io]
             [net.cgrand.enlive-html :as html]))
 

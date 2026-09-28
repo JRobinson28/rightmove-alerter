@@ -1,9 +1,9 @@
-(ns core.rightmove-alerter.core
+(ns rightmove-alerter.handler
   (:require
    [cheshire.core :as json]
    [clojure.java.io :as io]
-   [core.rightmove-alerter.aws :as aws]
-   [core.rightmove-alerter.scraper :as scraper]
+   [rightmove-alerter.alerter :as alerter]
+   [rightmove-alerter.scraper :as scraper]
    [taoensso.timbre :as log])
   (:gen-class
    :implements [com.amazonaws.services.lambda.runtime.RequestStreamHandler]))
@@ -17,9 +17,4 @@
   (let [event-map (input-stream->json input-stream)
         urls (scraper/scrape-page event-map)]
     (log/info "Scraped" (count urls) "URLs")
-    (aws/alert-new-uploads urls)))
-
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& _args]
-  (-handleRequest 1 2 3 4))
+    (alerter/alert-new-uploads urls)))
