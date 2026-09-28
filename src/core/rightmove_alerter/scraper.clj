@@ -3,7 +3,7 @@
             [net.cgrand.enlive-html :as html]))
 
 (defn- build-url
-  [{:keys [location min-bedrooms max-bedrooms max-price radius] :as input-map}]
+  [{:keys [location min-bedrooms max-bedrooms max-price radius] :as _input-map}]
   (str "https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=" location
        "&maxBedrooms=" max-bedrooms
        "&minBedrooms=" min-bedrooms
@@ -20,8 +20,8 @@
 
 (defn scrape-page
   [input-map]
-  (let [url (build-url input-map)
-        page-content (-> input-map build-url io/as-url html/html-resource)]
+  (let [page-content (-> input-map build-url io/as-url html/html-resource)]
     (->> (html/select page-content [:div.propertyCard-details])
          (mapv extract-link)
          rest)))
+

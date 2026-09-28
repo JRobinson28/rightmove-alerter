@@ -8,7 +8,6 @@
   (:gen-class
    :implements [com.amazonaws.services.lambda.runtime.RequestStreamHandler]))
 
-
 (defn- input-stream->json
   [input-stream]
   (json/parse-stream (io/reader input-stream) true))
@@ -20,8 +19,7 @@
     (log/info "Scraped" (count urls) "URLs")
     (aws/alert-new-uploads urls)))
 
-
 (defn -main
   "I don't do a whole lot ... yet."
-  [& args]
+  [& _args]
   (-handleRequest 1 2 3 4))

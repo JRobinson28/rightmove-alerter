@@ -1,6 +1,6 @@
 (ns core.rightmove-alerter-test
-  (:require [clojure.test :refer :all]
-            [core.rightmove-alerter.core :refer :all]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [core.rightmove-alerter.core]))
 
 (deftest a-test
   (testing "First test"

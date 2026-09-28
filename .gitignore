@@ -31,3 +31,4 @@
 samconfig.toml
 .aws-sam/*
 .markdown-preview.html
+.idea/

@@ -40,8 +40,8 @@
 (defn alert-new-uploads
   [urls]
   (let [new-urls (determine-new-uploads urls)]
-    (do (if (seq new-urls)
-          (log/info "New URLS:" new-urls)
-          (log/info "Found no new URLS"))
-        (upload-urls new-urls)
-        (alert-SNS new-urls))))
+    (if (seq new-urls)
+      (log/info "New URLS:" new-urls)
+      (log/info "Found no new URLS"))
+    (upload-urls new-urls)
+    (alert-SNS new-urls)))

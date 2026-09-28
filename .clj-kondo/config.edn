@@ -1,0 +1,2 @@
+{:linters {;; amazonica generates its API functions at load time
+           :unresolved-var {:exclude [amazonica.aws.dynamodbv2 amazonica.aws.sns]}}}
