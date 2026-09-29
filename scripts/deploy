@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Builds the Lambda jar and deploys the app stack. Needs AWS credentials, a
+# region (AWS_REGION or your profile's default) and:
+#   NOTIFICATION_EMAIL  where alerts are emailed
+#   SEARCHES            JSON list of searches, or put them in searches.json
+# Optional: STACK_NAME (default rightmove-alerter),
+#           BOOTSTRAP_STACK_NAME (default rightmove-alerter-bootstrap)
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+stack_name="${STACK_NAME:-rightmove-alerter}"
+bootstrap_stack_name="${BOOTSTRAP_STACK_NAME:-rightmove-alerter-bootstrap}"
+
+: "${NOTIFICATION_EMAIL:?NOTIFICATION_EMAIL must be set}"
+if [[ -z "${SEARCHES:-}" ]]; then
+  [[ -f searches.json ]] || { echo "Set SEARCHES or create searches.json" >&2; exit 1; }
+  SEARCHES="$(cat searches.json)"
+fi
+
+bootstrap_output() {
+  aws cloudformation describe-stacks --stack-name "$bootstrap_stack_name" \
+    --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" --output text
+}
+
+artifacts_bucket="$(bootstrap_output ArtifactsBucketName)"
+execution_role_arn="$(bootstrap_output CloudFormationExecutionRoleArn)"
+
+clojure -T:build uber
+
+aws cloudformation package \
+  --template-file infra/template.yml \
+  --s3-bucket "$artifacts_bucket" \
+  --output-template-file target/packaged.yml
+
+aws cloudformation deploy \
+  --template-file target/packaged.yml \
+  --stack-name "$stack_name" \
+  --role-arn "$execution_role_arn" \
+  --capabilities CAPABILITY_IAM \
+  --no-fail-on-empty-changeset \
+  --parameter-overrides \
+    "NotificationEmail=$NOTIFICATION_EMAIL" \
+    "Searches=$SEARCHES"

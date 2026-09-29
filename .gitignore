@@ -28,7 +28,6 @@
 .envrc
 .DS_Store
 .lein-repl-history
-samconfig.toml
-.aws-sam/*
 .markdown-preview.html
 .idea/
+searches.json
