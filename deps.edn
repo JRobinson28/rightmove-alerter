@@ -1,18 +1,18 @@
 {:paths ["src"]
- :deps {amazonica/amazonica {:mvn/version "0.3.168"
-                             :exclusions [com.amazonaws/aws-java-sdk
-                                          com.amazonaws/amazon-kinesis-client
-                                          com.amazonaws/dynamodb-streams-kinesis-adapter]}
-        cheshire/cheshire {:mvn/version "6.2.0"}
+ :deps {cheshire/cheshire {:mvn/version "6.2.0"}
         clj-http/clj-http {:mvn/version "3.13.1"}
-        com.amazonaws/aws-java-sdk-dynamodb {:mvn/version "1.12.797"}
-        com.amazonaws/aws-java-sdk-sns {:mvn/version "1.12.797"}
         com.amazonaws/aws-lambda-java-core {:mvn/version "1.4.0"}
         com.amazonaws/aws-lambda-java-runtime-interface-client {:mvn/version "2.12.1"}
+        com.cognitect.aws/api {:mvn/version "0.8.847"}
+        com.cognitect.aws/dynamodb {:mvn/version "871.2.51.4"}
+        com.cognitect.aws/endpoints {:mvn/version "871.2.54.18"}
+        com.cognitect.aws/sns {:mvn/version "871.2.55.2"}
         com.taoensso/timbre {:mvn/version "6.8.0"}
         org.clj-commons/hickory {:mvn/version "0.7.7"}
-        org.clojure/clojure {:mvn/version "1.12.6"}}
- :aliases {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.14" :git/sha "9d08b2a"}
+        org.clojure/clojure {:mvn/version "1.12.6"}
+        org.clojure/tools.cli {:mvn/version "1.4.256"}}
+ :aliases {:run {:main-opts ["-m" "rightmove-alerter.cli"]}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.14" :git/sha "9d08b2a"}
                           org.clojure/clojure {:mvn/version "1.12.6"}}
                    :ns-default build}
            :test {:extra-paths ["test" "test/resources"]
