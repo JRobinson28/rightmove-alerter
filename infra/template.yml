@@ -23,6 +23,9 @@ Parameters:
     Type: Number
     Default: 14
     AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90]
+  PermissionsBoundaryArn:
+    Type: String
+    Description: The bootstrap stack's FunctionPermissionsBoundaryArn output.
 
 Resources:
   SeenListingsTable:
@@ -69,6 +72,7 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
+      PermissionsBoundary: !Ref PermissionsBoundaryArn
       Policies:
         - PolicyName: rightmove-alerter
           PolicyDocument:

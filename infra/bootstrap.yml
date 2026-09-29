@@ -68,10 +68,27 @@ Resources:
               Bool:
                 aws:SecureTransport: 'false'
 
-  # CloudFormation assumes this role to create the app stack's resources, so
-  # neither GitHub nor a local deployer needs these permissions directly.
-  # Resources are scoped to the names CloudFormation generates for the stack,
-  # which all start with the stack name.
+  FunctionPermissionsBoundary:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Permissions boundary for the rightmove-alerter function role.
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:BatchGetItem
+              - dynamodb:BatchWriteItem
+            Resource: !Sub 'arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${AppStackName}-*'
+          - Effect: Allow
+            Action: sns:Publish
+            Resource: !Sub 'arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:${AppStackName}-*'
+          - Effect: Allow
+            Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AppStackName}*'
+
   CloudFormationExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -139,20 +156,48 @@ Resources:
                 Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub '${ArtifactsBucket.Arn}/*'
-              - Sid: IAM
+              # Only the function's role, and only with the permissions
+              # boundary attached, so a template can't create or edit a role
+              # into anything more powerful than the function needs.
+              - Sid: IAMBoundedRole
                 Effect: Allow
                 Action:
                   - iam:CreateRole
+                  - iam:PutRolePolicy
+                  - iam:DeleteRolePolicy
+                  - iam:PutRolePermissionsBoundary
+                Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AppStackName}-FunctionRole-*'
+                Condition:
+                  StringEquals:
+                    iam:PermissionsBoundary: !Ref FunctionPermissionsBoundary
+              - Sid: IAMRole
+                Effect: Allow
+                Action:
                   - iam:DeleteRole
                   - iam:GetRole
-                  - iam:UpdateAssumeRolePolicy
-                  - iam:PutRolePolicy
                   - iam:GetRolePolicy
-                  - iam:DeleteRolePolicy
+                  - iam:UpdateAssumeRolePolicy
                   - iam:TagRole
                   - iam:UntagRole
                   - iam:PassRole
-                Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AppStackName}-*'
+                Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AppStackName}-FunctionRole-*'
+              - Sid: DenyBoundaryRemoval
+                Effect: Deny
+                Action: iam:DeleteRolePermissionsBoundary
+                Resource: '*'
+              - Sid: DenyBoundaryPolicyChanges
+                Effect: Deny
+                Action:
+                  - iam:CreatePolicyVersion
+                  - iam:DeletePolicy
+                  - iam:DeletePolicyVersion
+                  - iam:SetDefaultPolicyVersion
+                Resource: !Ref FunctionPermissionsBoundary
+              # The bootstrap stack's own roles, whatever the stack is named.
+              - Sid: DenyBootstrapRoles
+                Effect: Deny
+                Action: iam:*
+                Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AWS::StackName}-*'
               - Sid: EventBridge
                 Effect: Allow
                 Action:
@@ -226,10 +271,17 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
+              # Changesets must run as the execution role, never as this role.
+              - Sid: CreateChangeSetAsExecutionRole
+                Effect: Allow
+                Action: cloudformation:CreateChangeSet
+                Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AppStackName}/*'
+                Condition:
+                  StringEquals:
+                    cloudformation:RoleArn: !GetAtt CloudFormationExecutionRole.Arn
               - Sid: AppStack
                 Effect: Allow
                 Action:
-                  - cloudformation:CreateChangeSet
                   - cloudformation:DescribeChangeSet
                   - cloudformation:ExecuteChangeSet
                   - cloudformation:DeleteChangeSet
@@ -265,5 +317,7 @@ Outputs:
     Value: !Ref ArtifactsBucket
   CloudFormationExecutionRoleArn:
     Value: !GetAtt CloudFormationExecutionRole.Arn
+  FunctionPermissionsBoundaryArn:
+    Value: !Ref FunctionPermissionsBoundary
   GitHubDeployRoleArn:
     Value: !GetAtt GitHubDeployRole.Arn

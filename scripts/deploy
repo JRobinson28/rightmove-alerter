@@ -25,6 +25,7 @@ bootstrap_output() {
 
 artifacts_bucket="$(bootstrap_output ArtifactsBucketName)"
 execution_role_arn="$(bootstrap_output CloudFormationExecutionRoleArn)"
+permissions_boundary_arn="$(bootstrap_output FunctionPermissionsBoundaryArn)"
 
 clojure -T:build uber
 
@@ -41,4 +42,5 @@ aws cloudformation deploy \
   --no-fail-on-empty-changeset \
   --parameter-overrides \
     "NotificationEmail=$NOTIFICATION_EMAIL" \
-    "Searches=$SEARCHES"
+    "Searches=$SEARCHES" \
+    "PermissionsBoundaryArn=$permissions_boundary_arn"
