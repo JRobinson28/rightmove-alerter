@@ -7,7 +7,7 @@
    [hickory.core :as hickory]
    [hickory.select :as select]))
 
-(def ^:private base-url "https://www.rightmove.co.uk")
+(def ^:private rightmove-url "https://www.rightmove.co.uk")
 (def ^:private search-path "/property-to-rent/find.html")
 
 ;; Rightmove's "Newest listed" ordering, so new listings always appear on page 1.
@@ -23,7 +23,7 @@
    :furnish-types "furnishTypes"})
 
 (defn- build-url
-  [search]
+  [base-url search]
   (let [params (into {"includeLetAgreed" false
                       "sortType" sort-newest-first}
                      (keep (fn [[k param]]
@@ -46,7 +46,7 @@
 (defn- ->listing
   [{:keys [id propertyUrl price displayAddress bedrooms firstVisibleDate]}]
   {:id (str id)
-   :url (str base-url (first (str/split propertyUrl #"#")))
+   :url (str rightmove-url (first (str/split propertyUrl #"#")))
    :price (-> price :displayPrices first :displayPrice)
    :address displayAddress
    :bedrooms bedrooms
@@ -71,6 +71,9 @@
     (into [] (comp (remove :featuredProperty) (map ->listing)) properties)))
 
 (defn scrape
-  "Returns the current listings for a search, newest first."
-  [search]
-  (-> search build-url fetch-page parse-listings))
+  "Returns the current listings for a search, newest first. `:base-url` sends
+  the request somewhere other than Rightmove (for tests); the listing URLs
+  always point at Rightmove."
+  ([search] (scrape search {}))
+  ([search {:keys [base-url]}]
+   (->> search (build-url (or base-url rightmove-url)) fetch-page parse-listings)))

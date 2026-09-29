@@ -14,10 +14,11 @@
 
 (def ^:private deps
   (delay
-    (let [{:keys [table-name topic-arn]} (config/env)
-          store {:client (aws/client {:api :dynamodb}) :table-name table-name}
-          sns (aws/client {:api :sns})]
-      {:scrape scraper/scrape
+    (let [{:keys [table-name topic-arn aws-endpoint rightmove-base-url]} (config/env)
+          client #(aws/client (cond-> {:api %} aws-endpoint (assoc :endpoint-override aws-endpoint)))
+          store {:client (client :dynamodb) :table-name table-name}
+          sns (client :sns)]
+      {:scrape #(scraper/scrape % {:base-url rightmove-base-url})
        :unseen-ids #(store/unseen-ids store %)
        :notify! #(notify/publish! sns topic-arn (notify/email %))
        :mark-seen! #(store/mark-seen! store %)})))

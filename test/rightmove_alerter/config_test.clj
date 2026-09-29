@@ -31,3 +31,30 @@
     (doseq [event [[] nil "REGION^1" 42]]
       (is (thrown-with-msg? clojure.lang.ExceptionInfo #"non-empty list of searches"
                             (config/searches event))))))
+
+(def ^:private required-env
+  {"TABLE_NAME" "seen" "TOPIC_ARN" "arn:aws:sns:eu-west-2:123456789012:alerts"})
+
+(deftest env-test
+  (testing "only the required settings are returned when the overrides aren't set"
+    (is (= {:table-name "seen" :topic-arn "arn:aws:sns:eu-west-2:123456789012:alerts"}
+           (config/env required-env))))
+
+  (testing "AWS_ENDPOINT_URL becomes an aws-api endpoint override"
+    (is (= {:protocol :http :hostname "aws" :port 5000}
+           (:aws-endpoint (config/env (assoc required-env "AWS_ENDPOINT_URL" "http://aws:5000")))))
+    (is (= {:protocol :https :hostname "example.com"}
+           (:aws-endpoint (config/env (assoc required-env "AWS_ENDPOINT_URL" "https://example.com"))))))
+
+  (testing "RIGHTMOVE_BASE_URL is passed through"
+    (is (= "http://rightmove:8080"
+           (:rightmove-base-url (config/env (assoc required-env "RIGHTMOVE_BASE_URL" "http://rightmove:8080"))))))
+
+  (testing "blank overrides are ignored"
+    (is (= #{:table-name :topic-arn}
+           (set (keys (config/env (assoc required-env "AWS_ENDPOINT_URL" "" "RIGHTMOVE_BASE_URL" " ")))))))
+
+  (testing "every missing required setting is reported"
+    (let [e (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Missing environment variables"
+                                  (config/env {"TABLE_NAME" " "})))]
+      (is (= [:table-name :topic-arn] (:missing (ex-data e)))))))

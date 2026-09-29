@@ -1,0 +1,39 @@
+services:
+  aws:
+    image: motoserver/moto:5.2.3
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/moto-api/data.json')"]
+      interval: 1s
+      retries: 30
+
+  rightmove:
+    # The image has its own healthcheck on /__admin/health.
+    image: wiremock/wiremock:3.13.2
+    ports:
+      - "8080:8080"
+
+  lambda:
+    image: public.ecr.aws/lambda/java:21
+    command: rightmove_alerter.handler::handleRequest
+    ports:
+      - "9000:8080"
+    volumes:
+      - ./target/rightmove-alerter.jar:/var/task/lib/rightmove-alerter.jar:ro
+    environment:
+      # Must match the resources the tests create (acceptance/setup.clj).
+      TABLE_NAME: rightmove-alerter-seen
+      TOPIC_ARN: arn:aws:sns:eu-west-2:123456789012:rightmove-alerter-alerts
+      AWS_ENDPOINT_URL: http://aws:5000
+      RIGHTMOVE_BASE_URL: http://rightmove:8080
+      AWS_REGION: eu-west-2
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_LAMBDA_FUNCTION_TIMEOUT: 60
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 512
+    depends_on:
+      aws:
+        condition: service_healthy
+      rightmove:
+        condition: service_healthy

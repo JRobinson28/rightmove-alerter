@@ -115,3 +115,15 @@
                   nil
                   (catch clojure.lang.ExceptionInfo e
                     (:status (ex-data e)))))))
+
+(deftest base-url-test
+  (let [request (atom nil)
+        listings (with-fake-routes-in-isolation
+                   {#"http://rightmove:8080/property-to-rent/find\.html.*"
+                    (fn [req] (reset! request req) {:status 200 :body search-page})}
+                   (scraper/scrape {:location "REGION^1"} {:base-url "http://rightmove:8080"}))]
+    (testing "the request goes to the base URL"
+      (is (= "rightmove" (:server-name @request))))
+
+    (testing "listing URLs still point at Rightmove"
+      (is (= "https://www.rightmove.co.uk/properties/93665742" (:url (first listings)))))))

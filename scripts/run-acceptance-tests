@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+clojure -T:build uber
+
+stop() {
+  local status=$?
+  if [[ $status -ne 0 ]]; then
+    docker compose logs lambda || true
+  fi
+  docker compose down -v
+  exit "$status"
+}
+trap stop EXIT
+
+docker compose up --wait
+clojure -M:acceptance "$@"
