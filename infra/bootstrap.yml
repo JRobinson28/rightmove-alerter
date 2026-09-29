@@ -15,7 +15,7 @@ Parameters:
     Description: owner/repo allowed to deploy.
   GitHubBranch:
     Type: String
-    Default: master
+    Default: main
     Description: Only workflows running on this branch can deploy.
   CreateGitHubOIDCProvider:
     Type: String
