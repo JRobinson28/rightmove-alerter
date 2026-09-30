@@ -5,7 +5,7 @@
         com.amazonaws/aws-lambda-java-core {:mvn/version "1.4.0"}
         com.cognitect.aws/api {:mvn/version "0.8.847"}
         com.cognitect.aws/dynamodb {:mvn/version "871.2.51.4"}
-        com.cognitect.aws/endpoints {:mvn/version "871.2.54.18"}
+        com.cognitect.aws/endpoints {:mvn/version "871.2.55.7"}
         com.cognitect.aws/sns {:mvn/version "871.2.55.2"}
         com.taoensso/timbre {:mvn/version "6.8.0"}
         org.clj-commons/hickory {:mvn/version "0.7.7"}

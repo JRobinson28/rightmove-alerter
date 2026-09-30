@@ -13,10 +13,12 @@ Parameters:
     Type: String
     Default: JRobinson28/rightmove-alerter
     Description: owner/repo allowed to deploy.
-  GitHubBranch:
+  GitHubEnvironment:
     Type: String
-    Default: main
-    Description: Only workflows running on this branch can deploy.
+    Default: production
+    Description: >
+      Only jobs using this GitHub environment can deploy. Its protection rules
+      (required reviewers) decide who can approve a deploy.
   CreateGitHubOIDCProvider:
     Type: String
     AllowedValues: ['true', 'false']
@@ -265,7 +267,7 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubRepo}:ref:refs/heads/${GitHubBranch}'
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubRepo}:environment:${GitHubEnvironment}'
       Policies:
         - PolicyName: deploy
           PolicyDocument:
